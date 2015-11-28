@@ -14,6 +14,7 @@ enum Literal {
     Integer(i64),
     Float(f64),
     Char(char),
+    Boolean(bool),
     Empty
 }
 
@@ -41,6 +42,22 @@ fn tokenize(s: String) -> Result<Vec<Token>, &'static str> {
     let mut nr_parant = 0;
     let op_set = "+-*/.<>=".to_string();
     let lit_set = "123456789".to_string();
+    let check_forming = |res: &mut Vec<Token>, crt_string: &mut String, literal: bool| -> Result<(), &'static str> {
+        if literal {
+            res.push(Token::Literal(try!(parse_literal(crt_string.clone()))));
+        } else {
+            if crt_string == "false" || crt_string == "true" {
+                if crt_string == "false" {
+                    res.push(Token::Literal(Literal::Boolean(false)));
+                } else {
+                    res.push(Token::Literal(Literal::Boolean(true)));
+                }
+            } else {
+                res.push(Token::Name(crt_string.clone()));
+            }
+        }
+        Ok(())
+    };
     for c in v {
         if next_lit {
             crt_string.push(c);
@@ -67,60 +84,48 @@ fn tokenize(s: String) -> Result<Vec<Token>, &'static str> {
             }
         } else if c == '(' {
             if forming {
-                if literal {
-                    res.push(Token::Literal(try!(parse_literal(crt_string.clone()))));
-                } else {
-                    res.push(Token::Name(crt_string.clone()));
-                }
-                forming = false;
+                try!(check_forming(&mut res, &mut crt_string, literal));
+                crt_string = String::new();
             }
             skip = true;
             parant = true;
             nr_parant = 1;
         } else if c == '"' {
             if forming {
-                if literal {
-                    res.push(Token::Literal(try!(parse_literal(crt_string.clone()))));
-                } else {
-                    res.push(Token::Name(crt_string.clone()));
-                }
-                forming = false;
+                try!(check_forming(&mut res, &mut crt_string, literal));
+                crt_string = String::new();
             }
             skip = true;
             quot = true;
             next_lit = false;
         } else if op_set.contains(c) {
             if forming {
-                if literal {
-                    res.push(Token::Literal(try!(parse_literal(crt_string.clone()))));
-                } else {
-                    res.push(Token::Name(crt_string.clone()));
-                }
-                forming = false;
+                try!(check_forming(&mut res, &mut crt_string, literal));
+                crt_string = String::new();
             }
             res.push(Token::Operator(c));
         } else if forming {
             crt_string.push(c);
         } else if lit_set.contains(c) {
             if forming {
-                if literal {
-                    res.push(Token::Literal(try!(parse_literal(crt_string.clone()))));
-                } else {
-                    res.push(Token::Name(crt_string.clone()));
-                }
+                try!(check_forming(&mut res, &mut crt_string, literal));
+                crt_string = String::new();
             }
             forming = true;
             literal = true;
         } else if c != ' ' {
             if forming {
-                if literal {
-                    res.push(Token::Literal(try!(parse_literal(crt_string.clone()))));
-                } else {
-                    res.push(Token::Name(crt_string.clone()));
-                }
+                try!(check_forming(&mut res, &mut crt_string, literal));
+                crt_string = String::new();
             }
             forming = true;
             literal = false;
+        } else {
+            if forming {
+                try!(check_forming(&mut res, &mut crt_string, literal));
+                crt_string = String::new();
+            }
+            forming = false;
         }
     }
     Ok(res)
