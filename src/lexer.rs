@@ -20,8 +20,27 @@ pub enum Token {
 }
 
 fn parse_literal(s: String) -> Result<Literal, &'static str> {
-    // Todo: Actually do something here!
-    Ok(Literal::Empty)
+    if s.contains('.') {
+        let f = match s.parse::<f64>() {
+            Ok(f) => {
+                f
+            }
+            _ => {
+                return Err("E004")
+            }
+        };
+        return Ok(Literal::Float(f));
+    } else {
+        let i = match s.parse::<i64>() {
+            Ok(f) => {
+                f
+            }
+            _ => {
+                return Err("E004")
+            }
+        };
+        return Ok(Literal::Integer(i))
+    }
 }
 
 pub fn lex(s: String) -> Result<Vec<Token>, &'static str> {
@@ -101,6 +120,8 @@ pub fn lex(s: String) -> Result<Vec<Token>, &'static str> {
             skip = true;
             quot = true;
             next_lit = false;
+        } else if c == '.' && forming && literal {
+            crt_string.push(c);
         } else if op_set.contains(c) { // Operator
             if forming {
                 try!(check_forming(&mut res, &mut crt_string, literal));
@@ -124,6 +145,9 @@ pub fn lex(s: String) -> Result<Vec<Token>, &'static str> {
             }
             forming = false;
         }
+    }
+    if forming {
+        try!(check_forming(&mut res, &mut crt_string, literal));
     }
     Ok(res)
 }

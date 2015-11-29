@@ -53,13 +53,20 @@ impl Parser {
                             let value = try!(self.into_type(token.clone()));
                             match value {
                                 Type::String(s) => {
-                                    println!("{}", s);
+                                    print!("{}", s);
+                                }
+                                Type::Integer(i) => {
+                                    print!("{}", i);
+                                }
+                                Type::Float(f) => {
+                                    print!("{}", f);
                                 }
                                 _ => {
                                     return Err("E002");
                                 }
                             }
                         }
+                        print!("\n");
                         return Ok(Type::Integer(expression.len() as i64 - 1));
                     }
                     _ => {

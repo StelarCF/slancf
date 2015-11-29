@@ -29,3 +29,14 @@ Example:
 ```
 pirnt "test"
 ```
+
+
+## E004
+
+Failed to parse integer/float literal
+
+Example
+
+```
+print 82.2.2
+```
