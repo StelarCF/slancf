@@ -1,1 +1,31 @@
 # Errors
+
+## E001
+
+Invalid token found; expected name (variable, function call or keyword)
+
+Example:
+
+```
+32 "test"
+```
+
+## E002
+
+Expected a type, but found another.
+
+Example:
+
+```
+print print
+```
+
+## E003
+
+Invalid name found (not a keyword, not a function, not a variable, not a type)
+
+Example:
+
+```
+pirnt "test"
+```
